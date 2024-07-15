@@ -80,6 +80,7 @@ const generateToken = () => {
 exports.forgotPassword = (req, res) => {
     const email = req.body.email;
     console.log(email);
+
     generateToken()
         .then((token) => {
             return User.findOne({ email: email })
@@ -88,11 +89,11 @@ exports.forgotPassword = (req, res) => {
                         return Promise.reject({ status: 400, message: 'No account with that email address exists.' });
                     }
                     user.resetPasswordToken = token;
-                    user.resetPasswordExpires = Date.now() + 3000;
-                    return user.save();
+                    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiration
+                    return user.save().then(() => ({ user, token }));
                 });
         })
-        .then((user) => {
+        .then(({ user, token }) => {
             const mailOptions = {
                 to: user.email,
                 from: process.env.EMAIL_USER,
@@ -103,17 +104,17 @@ exports.forgotPassword = (req, res) => {
                     `If you did not request this, please ignore this email and your password will remain unchanged.\n`
             };
 
-            return transporter.sendMail(mailOptions);
+            return transporter.sendMail(mailOptions).then(() => token);
         })
-        .then(() => {
-            res.status(200).json({ message: 'An e-mail has been sent with further instructions.' });
+        .then((token) => {
+            res.status(200).json({ message: 'An e-mail has been sent with further instructions.', resetPasswordToken: token });
         })
         .catch((err) => {
-            console.log("HElo");
             console.error(err);
             res.status(err.status || 500).json({ message: err.message || 'An error occurred.' });
         });
 };
+
 exports.resetPassword = (req, res) => {
     const token = req.params.token;
 
