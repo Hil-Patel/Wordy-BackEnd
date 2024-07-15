@@ -54,7 +54,7 @@ exports.postLogin = (req, res, next) => {
             return bcrypt.compare(password, user.password)
                 .then(doMatch => {
                     if (doMatch) {
-                        return res.status(201).json({ message: "User Found" });
+                        return res.status(201).json({ message: "User Login Successfull" });
                     }
                     res.status(400).json({ message: "User Not Found!" });
                 })
@@ -136,6 +136,6 @@ exports.resetPassword = (req, res) => {
         })
         .catch((err) => {
             console.error(err);
-            res.status(err.status || 500).json({ message: 'An error occurred.' });
+            res.status(500).json({ message: 'An error occurred.' });
         });
 };
