@@ -1,8 +1,10 @@
 const express = require('express');
 const bodyParser = require('body-parser');
 const mongoose = require('mongoose');
+const dotenv = require('dotenv');
 const app = express();
 
+dotenv.config();
 const signUpRoutes = require('./routes/user');
 
 app.use(bodyParser.json());
@@ -16,7 +18,7 @@ app.use((req, res, next) => {
 
 app.use(signUpRoutes);
 
-mongoose.connect('mongodb+srv://niravpatel0804:Wordy0801@cluster1.ou3nmi1.mongodb.net/Wordy?retryWrites=true&w=majority&appName=Cluster1')
+mongoose.connect(process.env.MONGO_URL)
     .then(res => {
         app.listen(8000);
     })

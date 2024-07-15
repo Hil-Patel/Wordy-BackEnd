@@ -1,4 +1,3 @@
-const { type } = require('mocha/lib/utils');
 const mongoose = require('mongoose');
 
 const Schema = mongoose.Schema;
@@ -16,6 +15,12 @@ const userSchema = new Schema({
     password: {
         required: true,
         type: String
+    },
+    resetPasswordToken: {
+        type: String
+    },
+    resetPasswordExpire: {
+        type: Date
     }
 
 });
