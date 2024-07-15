@@ -89,8 +89,8 @@ exports.forgotPassword = (req, res) => {
                         return Promise.reject({ status: 400, message: 'No account with that email address exists.' });
                     }
                     user.resetPasswordToken = token;
-                    user.resetPasswordExpires = Date.now() + 3600000;
-                    console.log(user.resetPasswordExpires);
+                    user.resetPasswordExpire = Date.now() + 3600000;
+                    console.log("Time:" + user.resetPasswordExpire);
                     return user.save().then(() => ({ user, token }));
                 });
         })
@@ -120,7 +120,7 @@ exports.forgotPassword = (req, res) => {
 exports.resetPassword = (req, res) => {
     const token = req.params.token;
     console.log(token);
-    User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } })
+    User.findOne({ resetPasswordToken: token, resetPasswordExpire: { $gt: Date.now() } })
         .then((user) => {
             if (!user) {
                 return Promise.reject({ status: 400, message: 'Password reset token is invalid or has expired.' });
@@ -130,7 +130,7 @@ exports.resetPassword = (req, res) => {
                 .then((hash) => {
                     user.password = hash;
                     user.resetPasswordToken = undefined;
-                    user.resetPasswordExpires = undefined;
+                    user.resetPasswordExpire = undefined;
                     return user.save();
                 });
         })
