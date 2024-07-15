@@ -89,23 +89,24 @@ exports.forgotPassword = (req, res) => {
                         return Promise.reject({ status: 400, message: 'No account with that email address exists.' });
                     }
                     user.resetPasswordToken = token;
-                    user.resetPasswordExpires = Date.now() + 3600000; // 1 hour expiration
+                    user.resetPasswordExpires = Date.now() + 3600000;
                     return user.save().then(() => ({ user, token }));
                 });
         })
+    console.log(user.resetPasswordExpires);
         .then(({ user, token }) => {
-            const mailOptions = {
-                to: user.email,
-                from: process.env.EMAIL_USER,
-                subject: 'Password Reset',
-                text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
-                    `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
-                    `http://localhost:5173/reset/${user.resetPasswordToken}\n\n` +
-                    `If you did not request this, please ignore this email and your password will remain unchanged.\n`
-            };
+        const mailOptions = {
+            to: user.email,
+            from: process.env.EMAIL_USER,
+            subject: 'Password Reset',
+            text: `You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n` +
+                `Please click on the following link, or paste this into your browser to complete the process:\n\n` +
+                `http://localhost:5173/reset/${user.resetPasswordToken}\n\n` +
+                `If you did not request this, please ignore this email and your password will remain unchanged.\n`
+        };
 
-            return transporter.sendMail(mailOptions).then(() => token);
-        })
+        return transporter.sendMail(mailOptions).then(() => token);
+    })
         .then((token) => {
             res.status(200).json({ message: 'An e-mail has been sent with further instructions.', resetPasswordToken: token });
         })
@@ -117,7 +118,7 @@ exports.forgotPassword = (req, res) => {
 
 exports.resetPassword = (req, res) => {
     const token = req.params.token;
-
+    console.log(token);
     User.findOne({ resetPasswordToken: token, resetPasswordExpires: { $gt: Date.now() } })
         .then((user) => {
             if (!user) {
