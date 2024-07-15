@@ -89,10 +89,10 @@ exports.forgotPassword = (req, res) => {
                     }
                     user.resetPasswordToken = token;
                     user.resetPasswordExpires = Date.now() + 3000;
-                    return user.save().then(() => ({ user, token }));
+                    return user.save();
                 });
         })
-        .then((user, token) => {
+        .then((user) => {
             const mailOptions = {
                 to: user.email,
                 from: process.env.EMAIL_USER,
@@ -103,10 +103,10 @@ exports.forgotPassword = (req, res) => {
                     `If you did not request this, please ignore this email and your password will remain unchanged.\n`
             };
 
-            return transporter.sendMail(mailOptions).then(() => token);
+            return transporter.sendMail(mailOptions);
         })
-        .then((token) => {
-            res.status(200).json({ message: 'An e-mail has been sent with further instructions.', resetPasswordToken: token });
+        .then(() => {
+            res.status(200).json({ message: 'An e-mail has been sent with further instructions.' });
         })
         .catch((err) => {
             console.log("HElo");
@@ -136,6 +136,6 @@ exports.resetPassword = (req, res) => {
         })
         .catch((err) => {
             console.error(err);
-            res.status(500).json({ message: 'An error occurred.' });
+            res.status(err.status || 500).json({ message: 'An error occurred.' });
         });
 };
