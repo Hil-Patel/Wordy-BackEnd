@@ -5,7 +5,8 @@ const dotenv = require('dotenv');
 const app = express();
 
 dotenv.config();
-const signUpRoutes = require('./routes/user');
+const userRoutes = require('./routes/user');
+const verifyUserRoutes = require('./routes/verifyUser');
 
 app.use(bodyParser.json());
 
@@ -16,7 +17,8 @@ app.use((req, res, next) => {
     next();
 });
 
-app.use(signUpRoutes);
+app.use(userRoutes);
+app.use(verifyUserRoutes);
 
 mongoose.connect(process.env.MONGO_URL)
     .then(res => {
