@@ -25,7 +25,7 @@ exports.postSendVerifyEmail = (req, res, next) => {
     verifyUser.findOne({ email: email })
         .then(user => {
             if (user && user.verified === true) {
-                return res.status(200).json({ message: 'Email already verified.', verified: user.verified });
+                return res.status(200).json({ message: 'Email already verified.', verified: true });
             }
 
             if (user && !user.verified) {
@@ -48,7 +48,7 @@ exports.postSendVerifyEmail = (req, res, next) => {
             }
 
             const mailOptions = {
-                to: savedUser.email,  // Ensure 'savedUser.email' is defined
+                to: savedUser.email,
                 from: process.env.EMAIL_USER,
                 subject: 'Your OTP for Email Verification',
                 html: `
@@ -61,7 +61,6 @@ exports.postSendVerifyEmail = (req, res, next) => {
                 `
             };
 
-            // Check if 'savedUser.email' is defined before sending email
             if (savedUser && savedUser.email) {
                 return transporter.sendMail(mailOptions);
             } else {
@@ -80,14 +79,16 @@ exports.postSendVerifyEmail = (req, res, next) => {
 
 
 
+
 exports.postVerifyEmailOTP = (req, res, next) => {
     const { email, OTP } = req.body;
 
     verifyUser.findOne({ OTP: OTP, email: email, OTPExpires: { $gt: Date.now() } })
         .then(user => {
             if (!user) {
-                return res.status(400).json({ message: 'Email or OTP is invalid.', verified: user.verified });
+                return res.status(400).json({ message: 'Email or OTP is invalid.', verified: false });
             }
+
             user.verified = true;
             user.OTP = undefined;
             user.OTPExpires = undefined;
@@ -95,7 +96,7 @@ exports.postVerifyEmailOTP = (req, res, next) => {
             return user.save();
         })
         .then(savedUser => {
-            return res.status(201).json({ message: 'Email is verified', verified: savedUser.verified });
+            return res.status(200).json({ message: 'Email is verified', verified: savedUser.verified });
         })
         .catch(err => {
             console.error(err);
@@ -103,19 +104,26 @@ exports.postVerifyEmailOTP = (req, res, next) => {
         });
 };
 
+
+
 exports.verifyEmail = (req, res, next) => {
     const { email } = req.body;
 
     verifyUser.findOne({ email: email })
         .then(user => {
-            if (user && user.verified === true) {
-                return res.status(200).json({ message: "Email already verified.", verified: user.verified })
+            if (!user) {
+                return res.status(404).json({ message: "Email not found." });
             }
-            return res.status(200).json({ message: "Email not verified.", verified: user.verified });
-        })
-        .catch((err) => {
-            console.log(err);
-            res.status(500).json({ message: "Internal server issue" });
-        });
 
-}
+            if (user.verified === true) {
+                return res.status(200).json({ message: "Email already verified.", verified: true });
+            } else {
+                return res.status(200).json({ message: "Email not verified.", verified: false });
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            return res.status(500).json({ message: "Internal Server Error." });
+        });
+};
+
