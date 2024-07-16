@@ -77,7 +77,7 @@ exports.postVerifyEmailOTP = (req, res, next) => {
     verifyUser.findOne({ OTP: OTP, email: email, OTPExpires: { $gt: Date.now() } })
         .then(user => {
             if (!user) {
-                return res.status(400).json({ message: 'Email or OTP is invalid.' });
+                return res.status(400).json({ message: 'Email or OTP is invalid.', verified: user.verified });
             }
             user.verified = true;
             user.OTP = undefined;
@@ -86,13 +86,10 @@ exports.postVerifyEmailOTP = (req, res, next) => {
             return user.save();
         })
         .then(savedUser => {
-            return res.status(201).json({ message: 'Email is verified' });
+            return res.status(201).json({ message: 'Email is verified', verified: savedUser.verified });
         })
         .catch(err => {
             console.error(err);
             return res.status(500).json({ message: 'Internal Server Error' });
         });
 };
-
-
-
