@@ -25,7 +25,7 @@ exports.postSendVerifyEmail = (req, res, next) => {
     verifyUser.findOne({ email: email })
         .then(user => {
             if (user && user.verified === true) {
-                return res.status(400).json({ message: 'Email already verified.', verified: user.verified });
+                return res.status(200).json({ message: 'Email already verified.', verified: user.verified });
             }
 
             if (user && !user.verified) {
@@ -48,7 +48,7 @@ exports.postSendVerifyEmail = (req, res, next) => {
             }
 
             const mailOptions = {
-                to: savedUser.email,
+                to: savedUser.email,  // Ensure 'savedUser.email' is defined
                 from: process.env.EMAIL_USER,
                 subject: 'Your OTP for Email Verification',
                 html: `
@@ -60,16 +60,25 @@ exports.postSendVerifyEmail = (req, res, next) => {
                     </div>
                 `
             };
-            return transporter.sendMail(mailOptions);
+
+            // Check if 'savedUser.email' is defined before sending email
+            if (savedUser && savedUser.email) {
+                return transporter.sendMail(mailOptions);
+            } else {
+                throw new Error('No recipients defined');
+            }
         })
         .then(() => {
             return res.status(201).json({ message: 'An e-mail has been sent with further instructions.', verified: false });
         })
         .catch(err => {
             console.error(err);
-            return res.status(err.status || 500).json({ message: err.message || 'An error occurred.' });
+            return res.status(500).json({ message: err.message || 'An error occurred.' });
         });
 };
+
+
+
 
 exports.postVerifyEmailOTP = (req, res, next) => {
     const { email, OTP } = req.body;
@@ -93,3 +102,20 @@ exports.postVerifyEmailOTP = (req, res, next) => {
             return res.status(500).json({ message: 'Internal Server Error' });
         });
 };
+
+exports.verifyEmail = (req, res, next) => {
+    const { email } = req.body;
+
+    verifyUser.findOne({ email: email })
+        .then(user => {
+            if (user && user.verified === true) {
+                return res.status(200).json({ message: "Email already verified.", verified: user.verified })
+            }
+            return res.status(200).json({ message: "Email not verified.", verified: user.verified });
+        })
+        .catch((err) => {
+            console.log(err);
+            res.status(500).json({ message: "Internal server issue" });
+        });
+
+}
