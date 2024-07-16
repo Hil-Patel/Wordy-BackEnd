@@ -86,7 +86,7 @@ exports.postVerifyEmailOTP = (req, res, next) => {
     verifyUser.findOne({ OTP: OTP, email: email, OTPExpires: { $gt: Date.now() } })
         .then(user => {
             if (!user) {
-                return res.status(400).json({ message: 'OTP is invalid.', verified: false });
+                return res.status(200).json({ message: 'OTP is invalid.', verified: false });
             }
             if (user) {
                 user.verified = true;
