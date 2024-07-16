@@ -86,23 +86,23 @@ exports.postVerifyEmailOTP = (req, res, next) => {
     verifyUser.findOne({ OTP: OTP, email: email, OTPExpires: { $gt: Date.now() } })
         .then(user => {
             if (!user) {
-                return res.status(200).json({ message: 'OTP is invalid.', verified: false });
+                return res.status(400).json({ message: 'OTP is invalid.', verified: false });
             }
+            if (user) {
+                user.verified = true;
+                user.OTP = undefined;
+                user.OTPExpires = undefined;
 
-            user.verified = true;
-            user.OTP = undefined;
-            user.OTPExpires = undefined;
-
-            return user.save();
-        })
-        .then(savedUser => {
-            res.status(200).json({ message: 'Email is verified', verified: savedUser.verified });
+                user.save();
+                return res.status(200).json({ message: 'Email is verified', verified: true });
+            }
         })
         .catch(err => {
             console.error(err);
-            res.status(500).json({ message: 'Internal Server Error' });
+            return res.status(500).json({ message: 'Internal Server Error' });
         });
 };
+
 
 
 
