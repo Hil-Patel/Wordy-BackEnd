@@ -1,6 +1,6 @@
-const mongoose = require('mongoose');
+import mongoose from 'mongoose';
 
-const Schema = mongoose.Schema;
+const { Schema } = mongoose;
 
 const verifyUserSchema = new Schema({
     email: {
@@ -17,6 +17,6 @@ const verifyUserSchema = new Schema({
         type: Boolean,
         required: true
     }
-});
+}, { timestamps: true });
 
-module.exports = mongoose.model("verifyUser", verifyUserSchema);
+export const VerifyUser = mongoose.model('verifyUser', verifyUserSchema);
