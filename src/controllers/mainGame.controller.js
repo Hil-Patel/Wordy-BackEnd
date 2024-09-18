@@ -1,4 +1,4 @@
-import { User } from "../models/user.model.js";
+import { GameData } from '../models/game.model';
 import { generate } from 'random-words';
 
 const postLength = (req, res, next) => {

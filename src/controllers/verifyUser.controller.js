@@ -73,7 +73,7 @@ const postSendVerifyEmail = asyncHandler(async (req, res, next) => {
 
         await transporter.sendMail(mailOptions);
 
-        return res.status(201).json(new ApiResponse(200, savedUser, 'An e-mail has been sent with OTP for email verification and it will expire in 10 minutes.'));
+        return res.status(201).json(new ApiResponse(200, savedUser, 'An e-mail has been sent with OTP for verification.'));
     } catch (error) {
         throw new ApiError(500, error?.message || "Email is not sent due to some sesrver error")
     }
